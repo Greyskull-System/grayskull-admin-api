@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { adminPrisma, TenantStatus } from '@grayskull/admin-database';
+import { adminPrisma, TenantStatus, Prisma, Module } from '@grayskull/admin-database';
 import { Client } from 'pg';
 
 @Injectable()
@@ -54,7 +54,7 @@ export class TenantService {
         throw new NotFoundException('Plano não encontrado');
       }
 
-      modulesToEnable = plan.modules.map(m => m.moduleId);
+      modulesToEnable = plan.modules.map((m: { moduleId: string }) => m.moduleId);
     } else if (moduleIds && moduleIds.length > 0) {
       // Valida se todos os módulos existem
       const modules = await adminPrisma.module.findMany({
@@ -73,11 +73,11 @@ export class TenantService {
       where: { isCore: true, isActive: true },
     });
     
-    const coreModuleIds = coreModules.map(m => m.id);
+    const coreModuleIds = coreModules.map((m: Module) => m.id);
     modulesToEnable = [...new Set([...coreModuleIds, ...modulesToEnable])];
 
     // Cria tenant com módulos em uma transação
-    return adminPrisma.$transaction(async (tx) => {
+    return adminPrisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const tenant = await tx.tenant.create({
         data: {
           ...tenantData,
@@ -281,7 +281,7 @@ export class TenantService {
       where: { isCore: true, isActive: true },
     });
     
-    const coreModuleIds = coreModules.map(m => m.id);
+    const coreModuleIds = coreModules.map((m: Module) => m.id);
     const allModuleIds = [...new Set([...coreModuleIds, ...moduleIds])];
 
     // Valida se todos os módulos existem
@@ -294,7 +294,7 @@ export class TenantService {
     }
 
     // Atualiza módulos em transação
-    const result = await adminPrisma.$transaction(async (tx) => {
+    const result = await adminPrisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // Remove todos os módulos atuais (exceto core que serão re-adicionados)
       await tx.tenantModule.deleteMany({
         where: { tenantId },

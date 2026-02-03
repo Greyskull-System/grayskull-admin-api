@@ -36,8 +36,9 @@ export class WhatsAppService {
     }
 
     // Verifica se o módulo WhatsApp está habilitado
+    type TenantModuleWithModule = typeof tenant.modules[number];
     const whatsappModule = tenant.modules.find(
-      tm => tm.module.code === 'whatsapp' || tm.module.code === 'baileys'
+      (tm: TenantModuleWithModule) => tm.module.code === 'whatsapp' || tm.module.code === 'baileys'
     );
 
     if (!whatsappModule || !whatsappModule.isEnabled) {
