@@ -1,0 +1,31 @@
+import { Controller, Post, Get, Param } from '@nestjs/common';
+import { ProvisioningService } from './provisioning.service';
+
+@Controller('provisioning')
+export class ProvisioningController {
+  constructor(private readonly provisioningService: ProvisioningService) {}
+
+  /**
+   * Provisiona o banco de dados para um tenant
+   */
+  @Post('tenant/:tenantId')
+  provisionTenant(@Param('tenantId') tenantId: string) {
+    return this.provisioningService.provisionTenant(tenantId);
+  }
+
+  /**
+   * Obtém a connection string de um tenant
+   */
+  @Get('tenant/:tenantId/connection')
+  getConnectionString(@Param('tenantId') tenantId: string) {
+    return this.provisioningService.getConnectionString(tenantId);
+  }
+
+  /**
+   * Verifica a saúde do banco de um tenant
+   */
+  @Get('tenant/:tenantId/health')
+  checkHealth(@Param('tenantId') tenantId: string) {
+    return this.provisioningService.checkHealth(tenantId);
+  }
+}
