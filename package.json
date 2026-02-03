@@ -22,7 +22,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@grayskull/admin-database": "file:../grayskull-admin-database",
+    "@grayskull/admin-database": "git+https://github.com/Greyskull-System/grayskull-admin-database.git#main",
     "@nestjs/common": "^10.3.0",
     "@nestjs/config": "^3.1.1",
     "@nestjs/core": "^10.3.0",
