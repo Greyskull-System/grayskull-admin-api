@@ -202,7 +202,7 @@ export class MigrationsService {
    */
   private runPrismaMigrate(cwd: string, connectionString: string): string {
     console.log(`Executando prisma migrate deploy em: ${cwd}`);
-    
+
     const result = execSync(
       `npx prisma migrate deploy`,
       {
@@ -213,6 +213,7 @@ export class MigrationsService {
         },
         encoding: 'utf-8',
         timeout: 120000, // 2 minutos para módulos maiores
+        shell: process.platform === 'win32' ? (process.env.COMSPEC ?? 'cmd.exe') : '/bin/sh',
       },
     );
 
@@ -312,6 +313,7 @@ export class MigrationsService {
             DATABASE_URL: connectionString,
           },
           encoding: 'utf-8',
+          shell: process.platform === 'win32' ? (process.env.COMSPEC ?? 'cmd.exe') : '/bin/sh',
         },
       );
 
