@@ -37,8 +37,7 @@ export class ProjectGeneratorService {
   ) {}
 
   /**
-   * Gera um ZIP com o projeto (frontend baseado no template) customizado para o tenant.
-   * Apenas copia o template e aplica substituições (ex.: remoção de company_id fixo).
+   * Gera um ZIP com frontend (template) + backend do cliente (login + proxy Core/Chat).
    */
   async generateZip(tenantId: string, templateId: string): Promise<{ stream: Readable; filename: string }> {
     const tenant = await this.tenantService.findById(tenantId);
@@ -51,23 +50,34 @@ export class ProjectGeneratorService {
       );
     }
 
-    const sourcePath = template.sourcePath
+    const frontendSourcePath = template.sourcePath
       ? join(basePath, template.sourcePath)
       : join(basePath, template.code);
 
-    if (!existsSync(sourcePath) || !statSync(sourcePath).isDirectory()) {
+    if (!existsSync(frontendSourcePath) || !statSync(frontendSourcePath).isDirectory()) {
       throw new NotFoundException(
-        `Template source não encontrado: ${sourcePath}. Verifique TEMPLATES_BASE_PATH e sourcePath do template.`,
+        `Template source não encontrado: ${frontendSourcePath}. Verifique TEMPLATES_BASE_PATH e sourcePath do template.`,
       );
     }
 
     const workDir = join(tmpdir(), `modulys-pax-gen-${randomUUID()}`);
     mkdirSync(workDir, { recursive: true });
+    const frontendDir = join(workDir, 'frontend');
+    mkdirSync(frontendDir, { recursive: true });
 
     try {
-      this.copyDir(sourcePath, workDir);
-      this.applyTransformations(workDir);
-      const filename = `frontend-${tenant.code}-${template.code}-${Date.now()}.zip`;
+      this.copyDir(frontendSourcePath, frontendDir);
+      this.applyTransformations(frontendDir);
+
+      const clientBackendPath = this.getClientBackendTemplatePath();
+      if (existsSync(clientBackendPath) && statSync(clientBackendPath).isDirectory()) {
+        const backendDir = join(workDir, 'backend');
+        mkdirSync(backendDir, { recursive: true });
+        this.copyDir(clientBackendPath, backendDir);
+        this.applyBackendReplacements(backendDir, tenant.code);
+      }
+
+      const filename = `project-${tenant.code}-${template.code}-${Date.now()}.zip`;
       const stream = this.createZipStream(workDir, filename);
       return { stream, filename };
     } catch (err) {
@@ -75,6 +85,16 @@ export class ProjectGeneratorService {
         `Erro ao gerar projeto: ${err instanceof Error ? err.message : String(err)}`,
       );
     }
+  }
+
+  private getClientBackendTemplatePath(): string {
+    const customPath = this.configService.get<string>('CLIENT_BACKEND_TEMPLATE_PATH');
+    if (customPath && existsSync(customPath)) return customPath;
+    return join(process.cwd(), 'templates', 'client-backend');
+  }
+
+  private applyBackendReplacements(dir: string, tenantCode: string): void {
+    this.walkAndReplace(dir, dir, (content) => content.replace(/__TENANT_CODE__/g, tenantCode));
   }
 
   private copyDir(src: string, dest: string): void {
@@ -115,7 +135,7 @@ export class ProjectGeneratorService {
   private walkAndReplace(
     root: string,
     current: string,
-    replace: (content: string, ext: string) => string,
+    replace: (content: string, ext?: string) => string,
   ): void {
     const entries = readdirSync(current, { withFileTypes: true });
     for (const entry of entries) {
