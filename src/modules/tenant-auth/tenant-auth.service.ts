@@ -39,6 +39,7 @@ export interface TenantAuthResponse {
       name: string;
       description: string | null;
     };
+    permissions: string[];
   };
 }
 
@@ -112,6 +113,7 @@ export class TenantAuthService {
         name: 'Usuário',
         description: null,
       };
+      let permissions: string[] = [];
       if (employee.roleId) {
         const roleResult = await client.query<{ id: string; name: string; description: string | null }>(
           `SELECT id, name, description FROM roles WHERE id = $1 LIMIT 1`,
@@ -121,6 +123,13 @@ export class TenantAuthService {
           const r = roleResult.rows[0];
           role = { id: r.id, name: r.name, description: r.description ?? null };
         }
+        const permResult = await client.query<{ code: string }>(
+          `SELECT p.code FROM role_permissions rp
+           JOIN permissions p ON p.id = rp."permissionId"
+           WHERE rp."roleId" = $1`,
+          [employee.roleId],
+        );
+        permissions = permResult.rows.map((row) => row.code);
       }
 
       const payload: TenantAuthPayload = {
@@ -148,7 +157,75 @@ export class TenantAuthService {
           branchId: employee.branchId,
           roleId: employee.roleId,
           role,
+          permissions,
         },
+      };
+    } finally {
+      await client.end().catch(() => {});
+    }
+  }
+
+  /**
+   * Retorna o usuário (employee + role + permissions) a partir do token.
+   * Usado pelo backend do cliente em GET /auth/me para devolver user com permissões.
+   */
+  async getMe(accessToken: string): Promise<TenantAuthResponse['user']> {
+    const payload = this.jwtService.verify(accessToken) as TenantAuthPayload;
+    const { connectionString } = await this.provisioningService.getConnectionString(payload.tenantId);
+    const client = new Client({ connectionString });
+    try {
+      await client.connect();
+      const empResult = await client.query<{
+        id: string;
+        name: string;
+        email: string;
+        companyId: string;
+        branchId: string;
+        roleId: string | null;
+      }>(
+        `SELECT id, name, email, "companyId", "branchId", "roleId"
+         FROM employees
+         WHERE id = $1 AND "hasSystemAccess" = true AND "isActive" = true
+         LIMIT 1`,
+        [payload.sub],
+      );
+      if (empResult.rows.length === 0) {
+        throw new UnauthorizedException('Usuário não encontrado ou inativo');
+      }
+      const employee = empResult.rows[0];
+      let role: { id: string; name: string; description: string | null } = {
+        id: '',
+        name: 'Usuário',
+        description: null,
+      };
+      let permissions: string[] = [];
+      if (employee.roleId) {
+        const roleResult = await client.query<{ id: string; name: string; description: string | null }>(
+          `SELECT id, name, description FROM roles WHERE id = $1 LIMIT 1`,
+          [employee.roleId],
+        );
+        if (roleResult.rows.length > 0) {
+          const r = roleResult.rows[0];
+          role = { id: r.id, name: r.name, description: r.description ?? null };
+        }
+        const permResult = await client.query<{ code: string }>(
+          `SELECT p.code FROM role_permissions rp
+           JOIN permissions p ON p.id = rp."permissionId"
+           WHERE rp."roleId" = $1`,
+          [employee.roleId],
+        );
+        permissions = permResult.rows.map((row) => row.code);
+      }
+      return {
+        id: employee.id,
+        email: employee.email,
+        name: employee.name,
+        tenantId: payload.tenantId,
+        companyId: employee.companyId,
+        branchId: employee.branchId,
+        roleId: employee.roleId,
+        role,
+        permissions,
       };
     } finally {
       await client.end().catch(() => {});

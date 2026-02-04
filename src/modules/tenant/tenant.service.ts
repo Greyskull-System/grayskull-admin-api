@@ -178,6 +178,33 @@ export class TenantService {
     });
   }
 
+  /**
+   * Busca tenant por id (UUID) ou por code. Útil para rotas que recebem identificador
+   * que pode ser um ou outro (ex: provisioning/connection).
+   */
+  async findByIdOrCode(idOrCode: string) {
+    const tenant = await adminPrisma.tenant.findFirst({
+      where: {
+        OR: [{ id: idOrCode }, { code: idOrCode }],
+      },
+      include: {
+        subscription: {
+          include: { plan: true },
+        },
+        modules: {
+          include: { module: true },
+        },
+        contacts: true,
+      },
+    });
+
+    if (!tenant) {
+      throw new NotFoundException('Tenant não encontrado');
+    }
+
+    return tenant;
+  }
+
   async update(id: string, data: Partial<{
     name: string;
     tradeName: string;

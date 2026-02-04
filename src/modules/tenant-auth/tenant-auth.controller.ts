@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Body, Headers, HttpCode, HttpStatus, UnauthorizedException } from '@nestjs/common';
 import { TenantAuthService, TenantLoginDto } from './tenant-auth.service';
 import { Public } from '../auth/public.decorator';
 
@@ -16,5 +16,18 @@ export class TenantAuthController {
   @HttpCode(HttpStatus.OK)
   login(@Body() body: TenantLoginDto) {
     return this.tenantAuthService.login(body);
+  }
+
+  /**
+   * Retorna o usuário atual (com role e permissions) a partir do Bearer token.
+   * O backend do cliente chama este endpoint em GET /auth/me repassando o token no header.
+   */
+  @Get('me')
+  async me(@Headers('authorization') authorization: string | undefined) {
+    const token = authorization?.startsWith('Bearer ') ? authorization.slice(7) : null;
+    if (!token) {
+      throw new UnauthorizedException('Token não informado');
+    }
+    return this.tenantAuthService.getMe(token);
   }
 }

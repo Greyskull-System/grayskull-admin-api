@@ -74,20 +74,71 @@ authRouter.post('/login', async (req: Request, res: Response) => {
   }
 });
 
-authRouter.get('/me', requireAuth, (req: Request, res: Response) => {
-  const user = (req as any).tenantUser as TenantPayload;
-  res.json({
-    id: user.sub,
-    email: user.email,
-    name: user.name,
-    tenantId: user.tenantId,
-    companyId: user.companyId,
-    branchId: user.branchId,
-    roleId: user.roleId,
-    role: {
-      id: user.roleId || '',
-      name: user.roleName || 'Usuário',
-      description: user.roleDescription ?? null,
-    },
-  });
+authRouter.get('/me', requireAuth, async (req: Request, res: Response) => {
+  const auth = req.headers.authorization;
+  if (!auth?.startsWith('Bearer ')) {
+    res.status(401).json({ message: 'Não autorizado' });
+    return;
+  }
+  const token = auth.slice(7);
+  if (!ADMIN_API_URL) {
+    const user = (req as any).tenantUser as TenantPayload;
+    return res.json({
+      id: user.sub,
+      email: user.email,
+      name: user.name,
+      tenantId: user.tenantId,
+      companyId: user.companyId,
+      branchId: user.branchId,
+      roleId: user.roleId,
+      role: {
+        id: user.roleId || '',
+        name: user.roleName || 'Usuário',
+        description: user.roleDescription ?? null,
+      },
+      permissions: [],
+    });
+  }
+  try {
+    const response = await fetch(`${ADMIN_API_URL}/tenant-auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) {
+      const fallback = (req as any).tenantUser as TenantPayload;
+      return res.json({
+        id: fallback.sub,
+        email: fallback.email,
+        name: fallback.name,
+        tenantId: fallback.tenantId,
+        companyId: fallback.companyId,
+        branchId: fallback.branchId,
+        roleId: fallback.roleId,
+        role: {
+          id: fallback.roleId || '',
+          name: fallback.roleName || 'Usuário',
+          description: fallback.roleDescription ?? null,
+        },
+        permissions: [],
+      });
+    }
+    const userWithPermissions = await response.json();
+    res.json(userWithPermissions);
+  } catch (e: any) {
+    const user = (req as any).tenantUser as TenantPayload;
+    res.json({
+      id: user.sub,
+      email: user.email,
+      name: user.name,
+      tenantId: user.tenantId,
+      companyId: user.companyId,
+      branchId: user.branchId,
+      roleId: user.roleId,
+      role: {
+        id: user.roleId || '',
+        name: user.roleName || 'Usuário',
+        description: user.roleDescription ?? null,
+      },
+      permissions: [],
+    });
+  }
 });

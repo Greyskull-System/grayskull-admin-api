@@ -206,7 +206,7 @@ export class ProvisioningService {
    * Se moduleCode for informado, exige que o tenant tenha o módulo habilitado e esteja ativo.
    */
   async getConnectionString(tenantId: string, moduleCode?: string) {
-    const tenant = await this.tenantService.findById(tenantId);
+    const tenant = await this.tenantService.findByIdOrCode(tenantId);
 
     if (!tenant.isProvisioned) {
       throw new BadRequestException('Tenant ainda não foi provisionado');
@@ -238,7 +238,7 @@ export class ProvisioningService {
    * Verifica a saúde do banco de um tenant
    */
   async checkHealth(tenantId: string) {
-    const tenant = await this.tenantService.findById(tenantId);
+    const tenant = await this.tenantService.findByIdOrCode(tenantId);
 
     if (!tenant.isProvisioned) {
       return { healthy: false, message: 'Tenant não provisionado' };
