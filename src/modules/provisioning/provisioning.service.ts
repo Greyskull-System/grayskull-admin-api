@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { adminPrisma } from '@grayskull/admin-database';
+import { adminPrisma } from '@modulys-pax/admin-database';
 import { TenantService } from '../tenant/tenant.service';
 import { Client } from 'pg';
 

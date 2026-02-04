@@ -31,7 +31,7 @@ async function bootstrap() {
   
   console.log(`
 ╔══════════════════════════════════════════════════════════════╗
-║                 Grayskull ADMIN BACKOFFICE                     ║
+║                 Modulys Pax ADMIN BACKOFFICE                    ║
 ╠══════════════════════════════════════════════════════════════╣
 ║  🔐 Admin API running on: http://localhost:${port}/api/admin     ║
 ║  📊 Tenant Management                                        ║

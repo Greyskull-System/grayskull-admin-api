@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { TenantService } from './tenant.service';
-import { TenantStatus } from '@grayskull/admin-database';
+import { TenantStatus } from '@modulys-pax/admin-database';
 
 @Controller('tenants')
 export class TenantController {

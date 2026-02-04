@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
-import { adminPrisma, SubscriptionStatus, TenantStatus } from '@grayskull/admin-database';
+import { adminPrisma, SubscriptionStatus, TenantStatus } from '@modulys-pax/admin-database';
 
 @Injectable()
 export class SubscriptionService {

@@ -23,7 +23,7 @@ export class ModuleController {
     isCore?: boolean;
     isCustom?: boolean;
     repositoryUrl?: string;  // Link do GitHub (referência)
-    modulePath?: string;     // Nome da pasta do projeto (ex: grayskull-baileys-service) - OBRIGATÓRIO se isCustom
+    modulePath?: string;     // Nome da pasta do projeto (ex: modulys-pax-baileys-service) - OBRIGATÓRIO se isCustom
     migrationsPath?: string; // Subpasta das migrations dentro do projeto (padrão: prisma)
   }) {
     return this.moduleService.create(body);

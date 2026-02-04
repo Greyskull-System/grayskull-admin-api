@@ -8,7 +8,7 @@ export class HealthController {
   check() {
     return {
       status: 'ok',
-      service: 'grayskull-admin-api',
+      service: 'modulys-pax-admin-api',
       timestamp: new Date().toISOString(),
     };
   }

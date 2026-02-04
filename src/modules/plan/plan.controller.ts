@@ -8,7 +8,7 @@ import {
   Param,
 } from '@nestjs/common';
 import { PlanService } from './plan.service';
-import { BillingCycle } from '@grayskull/admin-database';
+import { BillingCycle } from '@modulys-pax/admin-database';
 
 @Controller('plans')
 export class PlanController {

@@ -1,9 +1,9 @@
 import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { adminPrisma } from '@grayskull/admin-database';
+import { adminPrisma } from '@modulys-pax/admin-database';
 
 /**
- * Service para validação de permissões e proxy para o grayskull-baileys-service.
+ * Service para validação de permissões e proxy para o modulys-pax-baileys-service.
  */
 @Injectable()
 export class WhatsAppService {
@@ -47,7 +47,7 @@ export class WhatsAppService {
   }
 
   /**
-   * Faz proxy de uma requisição para o grayskull-baileys-service.
+   * Faz proxy de uma requisição para o modulys-pax-baileys-service.
    */
   async proxyRequest(
     method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',

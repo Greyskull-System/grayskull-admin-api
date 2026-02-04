@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { adminPrisma, TenantStatus, Prisma, Module } from '@grayskull/admin-database';
+import { adminPrisma, TenantStatus, Prisma, Module } from '@modulys-pax/admin-database';
 import { Client } from 'pg';
 
 @Injectable()

@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { adminPrisma } from '@grayskull/admin-database';
+import { adminPrisma } from '@modulys-pax/admin-database';
 import { TenantService } from '../tenant/tenant.service';
 import { execSync } from 'child_process';
 import * as path from 'path';
@@ -15,14 +15,14 @@ export class MigrationsService {
     private readonly configService: ConfigService,
     private readonly tenantService: TenantService,
   ) {
-    // Diretório base para resolver caminhos relativos (raiz do grayskull-admin-api)
+    // Diretório base para resolver caminhos relativos (raiz do modulys-pax-admin-api)
     const baseDir = path.resolve(__dirname, '../../../');
 
-    // Caminho do projeto grayskull-database (onde está o schema Prisma padrão)
-    const dbPath = this.configService.get('DATABASE_PROJECT_PATH', '../grayskull-database');
+    // Caminho do projeto modulys-pax-database (onde está o schema Prisma padrão)
+    const dbPath = this.configService.get('DATABASE_PROJECT_PATH', '../modulys-pax-database');
     this.databaseProjectPath = path.resolve(baseDir, dbPath);
 
-    // Raiz do workspace (onde ficam todos os projetos: grayskull-*, translog-*, etc.)
+    // Raiz do workspace (onde ficam todos os projetos: modulys-pax-*, etc.)
     const wsPath = this.configService.get('WORKSPACE_ROOT', '../');
     this.workspaceRoot = path.resolve(baseDir, wsPath);
 
@@ -32,7 +32,7 @@ export class MigrationsService {
 
   /**
    * Aplica migrations Prisma para um tenant
-   * 1. Primeiro aplica migrations padrão do grayskull-database
+   * 1. Primeiro aplica migrations padrão do modulys-pax-database
    * 2. Depois aplica migrations de cada módulo customizado
    */
   async applyMigrations(tenantId: string) {
@@ -50,7 +50,7 @@ export class MigrationsService {
       console.log(`Aplicando migrations para tenant: ${tenant.code}`);
       console.log(`Database: ${tenant.databaseName}`);
 
-      // 1. Aplica migrations padrão do grayskull-database
+      // 1. Aplica migrations padrão do modulys-pax-database
       console.log('\n=== Aplicando migrations padrão ===');
       const standardResult = await this.runPrismaMigrate(this.databaseProjectPath, connectionString);
       results.push({
@@ -177,7 +177,7 @@ export class MigrationsService {
 
   /**
    * Resolve o caminho do módulo customizado
-   * modulePath é apenas o nome da pasta do projeto (ex: "grayskull-baileys-service")
+   * modulePath é apenas o nome da pasta do projeto (ex: "modulys-pax-baileys-service")
    * O sistema concatena com o workspaceRoot automaticamente
    */
   private resolveModulePath(module: any): string {
@@ -332,7 +332,7 @@ export class MigrationsService {
           message: result,
         };
       } else {
-        // Módulo padrão - usa grayskull-database
+        // Módulo padrão - usa modulys-pax-database
         // Os módulos padrão compartilham o mesmo schema, então aplicar uma vez aplica para todos
         const result = await this.runPrismaMigrate(this.databaseProjectPath, connectionString);
 

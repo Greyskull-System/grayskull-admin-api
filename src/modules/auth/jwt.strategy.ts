@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { adminPrisma } from '@grayskull/admin-database';
+import { adminPrisma } from '@modulys-pax/admin-database';
 
 interface JwtPayload {
   sub: string;

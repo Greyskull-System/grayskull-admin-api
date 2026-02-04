@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { adminPrisma, BillingCycle } from '@grayskull/admin-database';
+import { adminPrisma, BillingCycle } from '@modulys-pax/admin-database';
 
 @Injectable()
 export class PlanService {

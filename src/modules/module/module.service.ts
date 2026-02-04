@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
-import { adminPrisma } from '@grayskull/admin-database';
+import { adminPrisma } from '@modulys-pax/admin-database';
 
 @Injectable()
 export class ModuleService {
@@ -11,7 +11,7 @@ export class ModuleService {
     isCore?: boolean;
     isCustom?: boolean;
     repositoryUrl?: string;  // Link do GitHub (referência)
-    modulePath?: string;     // Nome da pasta do projeto (ex: grayskull-baileys-service)
+    modulePath?: string;     // Nome da pasta do projeto (ex: modulys-pax-baileys-service)
     migrationsPath?: string; // Subpasta das migrations (padrão: prisma)
   }) {
     // Verifica se já existe módulo com mesmo código
@@ -26,7 +26,7 @@ export class ModuleService {
     // Módulos customizados DEVEM ter modulePath
     if (data.isCustom && !data.modulePath) {
       throw new BadRequestException(
-        'Módulos customizados devem ter o campo "modulePath" preenchido com o nome da pasta do projeto (ex: grayskull-baileys-service)'
+        'Módulos customizados devem ter o campo "modulePath" preenchido com o nome da pasta do projeto (ex: modulys-pax-baileys-service)'
       );
     }
 
@@ -76,7 +76,7 @@ export class ModuleService {
     isActive: boolean;
     isCustom: boolean;
     repositoryUrl: string;  // Link do GitHub (referência)
-    modulePath: string;     // Nome da pasta do projeto (ex: grayskull-baileys-service)
+    modulePath: string;     // Nome da pasta do projeto (ex: modulys-pax-baileys-service)
     migrationsPath: string; // Subpasta das migrations (padrão: prisma)
   }>) {
     const module = await this.findById(id) as any;
@@ -87,7 +87,7 @@ export class ModuleService {
 
     if (willBeCustom && !finalModulePath) {
       throw new BadRequestException(
-        'Módulos customizados devem ter o campo "modulePath" preenchido com o nome da pasta do projeto (ex: grayskull-baileys-service)'
+        'Módulos customizados devem ter o campo "modulePath" preenchido com o nome da pasta do projeto (ex: modulys-pax-baileys-service)'
       );
     }
 
