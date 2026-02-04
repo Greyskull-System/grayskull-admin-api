@@ -121,7 +121,7 @@ export class ProjectGeneratorService {
     }
 
     this.walkAndReplace(dir, dir, (content, ext) => {
-      if (!TEXT_EXT.has(ext)) return content;
+      if (!ext || !TEXT_EXT.has(ext)) return content;
       if (!content.includes('DEFAULT_COMPANY_ID')) return content;
       return content
         .replace(/\bDEFAULT_COMPANY_ID\b/g, 'useCompanyId()')
@@ -130,6 +130,22 @@ export class ProjectGeneratorService {
           'import { useCompanyId } from \'@/lib/constants/company.constants\';\n',
         );
     });
+
+    this.applyAuthContextRoleFix(dir);
+  }
+
+  /** Garante que user.role nunca seja undefined (evita 'reading description' of undefined). */
+  private applyAuthContextRoleFix(dir: string): void {
+    const authContextPath = join(dir, 'lib', 'auth', 'auth-context.tsx');
+    if (!existsSync(authContextPath)) return;
+    let content = readFileSync(authContextPath, 'utf8');
+    const safeRole =
+      `authResponse.user.role ? { id: authResponse.user.role.id, name: authResponse.user.role.name, description: authResponse.user.role.description ?? null } : { id: (authResponse.user as any).roleId ?? '', name: 'Usuário', description: null }`;
+    content = content.replace(
+      /role:\s*\{\s*\.\.\.authResponse\.user\.role,\s*description:\s*authResponse\.user\.role\.description\s*(\?\?|\|\|)\s*null,?\s*\}/g,
+      `role: ${safeRole}`,
+    );
+    writeFileSync(authContextPath, content, 'utf8');
   }
 
   private walkAndReplace(

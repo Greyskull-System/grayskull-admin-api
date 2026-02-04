@@ -22,3 +22,5 @@ Backend mínimo que autentica usuários via Modulys Pax (tenant-auth) e faz prox
 ## Frontend
 
 O frontend deve apontar para este backend (ex: `NEXT_PUBLIC_API_URL=http://localhost:4000`) e usar `/auth/login` e enviar o token em `Authorization: Bearer <token>` nas requisições para `/api/core/*` e `/api/chat/*`.
+
+Para **chat em tempo real** (Socket.IO), o frontend precisa de `NEXT_PUBLIC_CHAT_WS_URL` apontando para o chat-service (ex: `http://localhost:9001`), já que o WebSocket conecta diretamente ao serviço de chat. Use a mesma base de URL do `CHAT_SERVICE_URL` configurado neste backend.

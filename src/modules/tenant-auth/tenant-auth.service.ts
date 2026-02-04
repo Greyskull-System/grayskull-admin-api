@@ -18,6 +18,8 @@ export interface TenantAuthPayload {
   companyId: string;
   branchId: string;
   roleId: string | null;
+  roleName: string;
+  roleDescription: string | null;
   email: string;
   name: string;
 }
@@ -32,6 +34,11 @@ export interface TenantAuthResponse {
     companyId: string;
     branchId: string;
     roleId: string | null;
+    role: {
+      id: string;
+      name: string;
+      description: string | null;
+    };
   };
 }
 
@@ -100,12 +107,30 @@ export class TenantAuthService {
         throw new UnauthorizedException('Tenant ou credenciais inválidos');
       }
 
+      let role: { id: string; name: string; description: string | null } = {
+        id: '',
+        name: 'Usuário',
+        description: null,
+      };
+      if (employee.roleId) {
+        const roleResult = await client.query<{ id: string; name: string; description: string | null }>(
+          `SELECT id, name, description FROM roles WHERE id = $1 LIMIT 1`,
+          [employee.roleId],
+        );
+        if (roleResult.rows.length > 0) {
+          const r = roleResult.rows[0];
+          role = { id: r.id, name: r.name, description: r.description ?? null };
+        }
+      }
+
       const payload: TenantAuthPayload = {
         sub: employee.id,
         tenantId: tenant.id,
         companyId: employee.companyId,
         branchId: employee.branchId,
         roleId: employee.roleId,
+        roleName: role.name,
+        roleDescription: role.description,
         email: employee.email,
         name: employee.name,
       };
@@ -122,6 +147,7 @@ export class TenantAuthService {
           companyId: employee.companyId,
           branchId: employee.branchId,
           roleId: employee.roleId,
+          role,
         },
       };
     } finally {

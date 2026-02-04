@@ -11,6 +11,8 @@ export interface TenantPayload {
   companyId: string;
   branchId: string;
   roleId: string | null;
+  roleName?: string;
+  roleDescription?: string | null;
   email: string;
   name: string;
 }
@@ -82,5 +84,10 @@ authRouter.get('/me', requireAuth, (req: Request, res: Response) => {
     companyId: user.companyId,
     branchId: user.branchId,
     roleId: user.roleId,
+    role: {
+      id: user.roleId || '',
+      name: user.roleName || 'Usuário',
+      description: user.roleDescription ?? null,
+    },
   });
 });

@@ -20,7 +20,7 @@ if (CORE_URL) {
     '/core',
     requireAuth,
     proxy(CORE_URL, {
-      proxyReqPathResolver: (req) => (req.url || '').replace(/^\/core/, '') || '/',
+      proxyReqPathResolver: (req: Request) => (req.url || '').replace(/^\/core/, '') || '/',
       proxyReqOptDecorator: tenantHeaderDecorator,
     }) as any,
   );
@@ -35,7 +35,7 @@ if (CHAT_URL) {
     '/chat',
     requireAuth,
     proxy(CHAT_URL, {
-      proxyReqPathResolver: (req) => (req.url || '').replace(/^\/chat/, '') || '/',
+      proxyReqPathResolver: (req: Request) => (req.url || '').replace(/^\/chat/, '') || '/',
       proxyReqOptDecorator: tenantHeaderDecorator,
     }) as any,
   );
